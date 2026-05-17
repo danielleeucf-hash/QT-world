@@ -190,7 +190,7 @@ function normalizeApiDevotion(data) {
 function renderScripture(selected) {
   scriptureText.innerHTML = selected.verses
     .map((verse, index) => `
-      <p><span class="verse-number">${index + 1}</span>${escapeHtml(verse)}${index < selected.verses.length - 1 ? '<span class="breath-mark" aria-label="끊어 읽기">쉼</span>' : ""}</p>
+      <p data-verse-index="${index}"><span class="verse-number">${index + 1}</span>${escapeHtml(verse)}${index < selected.verses.length - 1 ? '<span class="breath-mark" aria-label="끊어 읽기">쉼</span>' : ""}</p>
     `)
     .join("");
 }
@@ -349,6 +349,26 @@ function setTtsState(state) {
   }[state];
 }
 
+function clearReadingHighlight() {
+  scriptureText.querySelectorAll(".is-reading").forEach((element) => {
+    element.classList.remove("is-reading");
+    element.removeAttribute("aria-current");
+  });
+}
+
+function markReadingVerse(index) {
+  clearReadingHighlight();
+  const verseElement = scriptureText.querySelector(`[data-verse-index="${index}"]`);
+
+  if (!verseElement) {
+    return;
+  }
+
+  verseElement.classList.add("is-reading");
+  verseElement.setAttribute("aria-current", "true");
+  verseElement.scrollIntoView({ behavior: "smooth", block: "center" });
+}
+
 let ttsAudio = null;
 let meditationAudio = null;
 let meditationPlaying = false;
@@ -373,6 +393,7 @@ function stopReading() {
     speechSynthesis.cancel();
   }
 
+  clearReadingHighlight();
   setTtsState("idle");
 }
 
@@ -490,6 +511,7 @@ async function playReadingQueue() {
 
     const segment = readingQueue[readingIndex];
     const isLastSegment = readingIndex === readingQueue.length - 1;
+    markReadingVerse(readingIndex);
 
     try {
       await readWithClovaDubbing(segment, isLastSegment);
@@ -508,6 +530,7 @@ async function playReadingQueue() {
   if (!stopRequested && readingIndex >= readingQueue.length) {
     readingQueue = [];
     readingIndex = 0;
+    clearReadingHighlight();
     setTtsState("idle");
   }
 }
