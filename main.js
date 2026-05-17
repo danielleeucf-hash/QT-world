@@ -99,18 +99,8 @@ const passages = {
 };
 
 const storageKey = "qt-world-journal";
-const googleApiKeyStorageKey = "qt-world-google-tts-key";
+const googleNaturalVoice = "ko-KR-Chirp3-HD-Achernar";
 const passageOrder = Object.keys(passages);
-const googleVoices = [
-  { name: "ko-KR-Chirp3-HD-Achernar", label: "Chirp3 HD Achernar · 여성" },
-  { name: "ko-KR-Chirp3-HD-Charon", label: "Chirp3 HD Charon · 남성" },
-  { name: "ko-KR-Neural2-A", label: "Neural2 A · 여성" },
-  { name: "ko-KR-Neural2-B", label: "Neural2 B · 여성" },
-  { name: "ko-KR-Neural2-C", label: "Neural2 C · 남성" },
-  { name: "ko-KR-Wavenet-A", label: "Wavenet A · 여성" },
-  { name: "ko-KR-Wavenet-C", label: "Wavenet C · 남성" },
-  { name: "ko-KR-Standard-A", label: "Standard A · 여성" }
-];
 const form = document.querySelector("#journalForm");
 const passageSelect = document.querySelector("#passageSelect");
 const dailyPassageNote = document.querySelector("#dailyPassageNote");
@@ -122,8 +112,6 @@ const todayApplication = document.querySelector("#todayApplication");
 const todayPrayer = document.querySelector("#todayPrayer");
 const scriptureText = document.querySelector("#scriptureText");
 const ttsStatus = document.querySelector("#ttsStatus");
-const googleApiKey = document.querySelector("#googleApiKey");
-const voiceSelect = document.querySelector("#voiceSelect");
 const playTts = document.querySelector("#playTts");
 const pauseTts = document.querySelector("#pauseTts");
 const stopTts = document.querySelector("#stopTts");
@@ -360,21 +348,6 @@ function setTtsState(state) {
   }[state];
 }
 
-function populateVoiceSelect() {
-  const currentValue = voiceSelect.value;
-  voiceSelect.disabled = false;
-  voiceSelect.innerHTML = googleVoices
-    .map((voice, index) => {
-      const label = index === 0 ? `${voice.label} · 추천` : voice.label;
-      return `<option value="${escapeHtml(voice.name)}">${escapeHtml(label)}</option>`;
-    })
-    .join("");
-
-  if (currentValue && googleVoices.some((voice) => voice.name === currentValue)) {
-    voiceSelect.value = currentValue;
-  }
-}
-
 let googleAudio = null;
 let readingQueue = [];
 let readingIndex = 0;
@@ -455,7 +428,7 @@ function readWithBrowserTts(text, isLastSegment = true) {
 }
 
 async function readWithGoogleCloud(text, isLastSegment = true) {
-  const apiKey = googleApiKey.value.trim();
+  const apiKey = window.QT_GOOGLE_TTS_API_KEY || "";
 
   if (!apiKey) {
     await readWithBrowserTts(text, isLastSegment);
@@ -473,7 +446,7 @@ async function readWithGoogleCloud(text, isLastSegment = true) {
       input: { text },
       voice: {
         languageCode: "ko-KR",
-        name: voiceSelect.value || googleVoices[0].name
+        name: googleNaturalVoice
       },
       audioConfig: {
         audioEncoding: "MP3",
@@ -595,11 +568,6 @@ function renderHymn(selected) {
   hymnPreview.src = selected.hymn.embed || "about:blank";
 }
 
-function initGoogleTtsSettings() {
-  googleApiKey.value = localStorage.getItem(googleApiKeyStorageKey) || "";
-  populateVoiceSelect();
-}
-
 passageSelect.addEventListener("change", () => updatePassage());
 form.addEventListener("submit", saveNote);
 clearForm.addEventListener("click", resetForm);
@@ -607,14 +575,7 @@ printPage.addEventListener("click", () => window.print());
 playTts.addEventListener("click", readSelectedPassage);
 pauseTts.addEventListener("click", pauseReading);
 stopTts.addEventListener("click", stopReading);
-voiceSelect.addEventListener("change", stopReading);
-googleApiKey.addEventListener("change", () => {
-  localStorage.setItem(googleApiKeyStorageKey, googleApiKey.value.trim());
-});
 window.addEventListener("beforeunload", stopReading);
-if ("speechSynthesis" in window) {
-  speechSynthesis.addEventListener("voiceschanged", populateVoiceSelect);
-}
 savedList.addEventListener("click", (event) => {
   const button = event.target.closest("[data-id]");
   if (button) {
@@ -624,6 +585,5 @@ savedList.addEventListener("click", (event) => {
 
 initDate();
 initDailyPassage();
-initGoogleTtsSettings();
 loadTodayDevotion();
 renderNotes();

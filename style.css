@@ -439,17 +439,15 @@ blockquote {
   align-items: end;
   display: grid;
   gap: 12px;
-  grid-template-columns: minmax(180px, 1fr) minmax(190px, 1fr) minmax(260px, auto);
+  grid-template-columns: minmax(180px, 1fr) minmax(260px, auto);
   margin-bottom: 18px;
 }
 
-.api-key-field span,
-.voice-field span {
-  color: var(--sage-dark);
-  display: block;
-  font-size: 0.9rem;
-  font-weight: 800;
-  margin-bottom: 8px;
+.tts-note {
+  color: var(--muted);
+  font-size: 0.92rem;
+  font-weight: 700;
+  margin: 0;
 }
 
 .tts-controls {
