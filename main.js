@@ -44,8 +44,10 @@ const passages = {
 };
 
 const storageKey = "qt-world-journal";
+const passageOrder = Object.keys(passages);
 const form = document.querySelector("#journalForm");
 const passageSelect = document.querySelector("#passageSelect");
+const dailyPassageNote = document.querySelector("#dailyPassageNote");
 const keyVerse = document.querySelector("#keyVerse");
 const passageGuide = document.querySelector("#passageGuide");
 const passageExplanation = document.querySelector("#passageExplanation");
@@ -106,9 +108,19 @@ function renderScripture(selected) {
 }
 
 function getReadableScripture(selected) {
-  return `${selected.label}. ${selected.verses
-    .map((verse, index) => `${index + 1}절. ${verse}`)
-    .join(" ")}`;
+  return selected.verses.join(" ");
+}
+
+function getDailyPassageKey(date = new Date()) {
+  const localDay = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  const daysSinceEpoch = Math.floor(localDay.getTime() / 86400000);
+  return passageOrder[daysSinceEpoch % passageOrder.length];
+}
+
+function initDailyPassage() {
+  const dailyKey = getDailyPassageKey();
+  passageSelect.value = dailyKey;
+  dailyPassageNote.textContent = `오늘의 기본 묵상 본문은 ${passages[dailyKey].label}입니다.`;
 }
 
 function updatePassage() {
@@ -364,6 +376,7 @@ savedList.addEventListener("click", (event) => {
 });
 
 initDate();
+initDailyPassage();
 populateVoiceSelect();
 updatePassage();
 renderNotes();

@@ -325,6 +325,12 @@ input {
   padding: 0 14px;
 }
 
+.daily-note {
+  color: var(--muted);
+  font-size: 0.9rem;
+  margin: 10px 0 0;
+}
+
 textarea {
   min-height: 150px;
   padding: 14px;
