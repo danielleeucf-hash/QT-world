@@ -466,6 +466,21 @@ blockquote {
   margin: 0;
 }
 
+.breath-mark {
+  align-items: center;
+  background: #eef4f1;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--sage-dark);
+  display: inline-flex;
+  font-size: 0.74rem;
+  font-weight: 800;
+  line-height: 1;
+  margin-left: 10px;
+  padding: 5px 8px;
+  vertical-align: middle;
+}
+
 .hymn-card p {
   color: var(--muted);
   margin: 0 0 16px;

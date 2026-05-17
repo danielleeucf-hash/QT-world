@@ -172,13 +172,13 @@ function getSelectedPassage() {
 function renderScripture(selected) {
   scriptureText.innerHTML = selected.verses
     .map((verse, index) => `
-      <p><span class="verse-number">${index + 1}</span>${escapeHtml(verse)}</p>
+      <p><span class="verse-number">${index + 1}</span>${escapeHtml(verse)}${index < selected.verses.length - 1 ? '<span class="breath-mark" aria-label="끊어 읽기">쉼</span>' : ""}</p>
     `)
     .join("");
 }
 
 function getReadableScripture(selected) {
-  return selected.verses.join(" ");
+  return selected.verses;
 }
 
 function getDailyPassageKey(date = new Date()) {
@@ -313,10 +313,18 @@ function populateVoiceSelect() {
   }
 }
 
-let browserUtterance = null;
 let googleAudio = null;
+let readingQueue = [];
+let readingIndex = 0;
+let stopRequested = false;
+let pauseRequested = false;
 
 function stopReading() {
+  stopRequested = true;
+  pauseRequested = false;
+  readingQueue = [];
+  readingIndex = 0;
+
   if (googleAudio) {
     googleAudio.pause();
     googleAudio.currentTime = 0;
@@ -340,16 +348,16 @@ function getBrowserVoice() {
     || null;
 }
 
-function readWithBrowserTts(text) {
+function wait(ms) {
+  return new Promise((resolve) => {
+    window.setTimeout(resolve, ms);
+  });
+}
+
+function readWithBrowserTts(text, isLastSegment = true) {
   if (!("speechSynthesis" in window)) {
     setTtsState("unsupported");
-    return;
-  }
-
-  if (speechSynthesis.paused) {
-    speechSynthesis.resume();
-    setTtsState("playing");
-    return;
+    return Promise.resolve();
   }
 
   speechSynthesis.cancel();
@@ -365,19 +373,30 @@ function readWithBrowserTts(text) {
     utterance.voice = voice;
   }
 
-  browserUtterance = utterance;
-  utterance.onstart = () => setTtsState("fallback");
-  utterance.onend = () => setTtsState("idle");
-  utterance.onerror = () => setTtsState("idle");
+  return new Promise((resolve) => {
+    utterance.onstart = () => setTtsState("fallback");
+    utterance.onend = () => {
+      if (isLastSegment) {
+        setTtsState("idle");
+      }
+      resolve();
+    };
+    utterance.onerror = () => {
+      if (isLastSegment) {
+        setTtsState("idle");
+      }
+      resolve();
+    };
 
-  speechSynthesis.speak(utterance);
+    speechSynthesis.speak(utterance);
+  });
 }
 
-async function readWithGoogleCloud(text) {
+async function readWithGoogleCloud(text, isLastSegment = true) {
   const apiKey = googleApiKey.value.trim();
 
   if (!apiKey) {
-    readWithBrowserTts(text);
+    await readWithBrowserTts(text, isLastSegment);
     return;
   }
 
@@ -410,36 +429,86 @@ async function readWithGoogleCloud(text) {
   const result = await response.json();
   googleAudio = new Audio(`data:audio/mp3;base64,${result.audioContent}`);
   googleAudio.onplay = () => setTtsState("playing");
-  googleAudio.onended = () => setTtsState("idle");
+  googleAudio.onended = () => {
+    if (isLastSegment) {
+      setTtsState("idle");
+    }
+  };
   googleAudio.onerror = () => setTtsState("idle");
-  await googleAudio.play();
+  await new Promise((resolve, reject) => {
+    googleAudio.onended = () => {
+      if (isLastSegment) {
+        setTtsState("idle");
+      }
+      resolve();
+    };
+    googleAudio.onerror = reject;
+    googleAudio.play().catch(reject);
+  });
+}
+
+async function playReadingQueue() {
+  stopRequested = false;
+  pauseRequested = false;
+
+  while (readingIndex < readingQueue.length && !stopRequested) {
+    if (pauseRequested) {
+      return;
+    }
+
+    const segment = readingQueue[readingIndex];
+    const isLastSegment = readingIndex === readingQueue.length - 1;
+
+    try {
+      await readWithGoogleCloud(segment, isLastSegment);
+    } catch {
+      await readWithBrowserTts(segment, isLastSegment);
+    }
+
+    readingIndex += 1;
+
+    if (!isLastSegment && !stopRequested && !pauseRequested) {
+      setTtsState("loading");
+      await wait(520);
+    }
+  }
+
+  if (!stopRequested && readingIndex >= readingQueue.length) {
+    readingQueue = [];
+    readingIndex = 0;
+    setTtsState("idle");
+  }
 }
 
 async function readSelectedPassage() {
   if (googleAudio && googleAudio.paused && googleAudio.currentTime > 0) {
+    pauseRequested = false;
     await googleAudio.play();
     return;
   }
 
   if ("speechSynthesis" in window && speechSynthesis.paused) {
+    pauseRequested = false;
     speechSynthesis.resume();
     setTtsState("fallback");
     return;
   }
 
-  const selected = getSelectedPassage();
-  const text = getReadableScripture(selected);
-
-  try {
-    await readWithGoogleCloud(text);
-  } catch {
-    readWithBrowserTts(text);
+  if (pauseRequested && readingQueue.length > 0) {
+    await playReadingQueue();
+    return;
   }
+
+  const selected = getSelectedPassage();
+  readingQueue = getReadableScripture(selected);
+  readingIndex = 0;
+  await playReadingQueue();
 }
 
 function pauseReading() {
   if (googleAudio && !googleAudio.paused) {
     googleAudio.pause();
+    pauseRequested = true;
     setTtsState("paused");
     return;
   }
@@ -451,6 +520,7 @@ function pauseReading() {
 
   if (speechSynthesis.speaking && !speechSynthesis.paused) {
     speechSynthesis.pause();
+    pauseRequested = true;
     setTtsState("paused");
   }
 }
