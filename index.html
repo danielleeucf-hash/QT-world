@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="QT World는 매일 말씀 묵상, 기록, 기도, 적용을 돕는 전문 큐티 웹사이트입니다." />
+  <meta name="description" content="QT World는 매일 바뀌는 말씀 본문, Google Cloud TTS, 찬송가, 한 줄 묵상을 돕는 큐티 웹사이트입니다." />
   <title>QT World | 매일 말씀 묵상</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -29,7 +29,7 @@
       <div class="hero-content">
         <p class="eyebrow">Daily Quiet Time Platform</p>
         <h1 id="hero-title">말씀을 읽고, 삶으로 기록하는 매일 묵상</h1>
-        <p class="hero-copy">본문 읽기부터 관찰, 해석, 적용, 기도까지 한 번에 정리하며 매일의 말씀을 삶으로 이어가도록 설계했습니다.</p>
+        <p class="hero-copy">매일 바뀌는 긴 본문을 듣고, 찬송과 함께 한 줄 묵상으로 삶의 방향을 정리하도록 설계했습니다.</p>
         <div class="hero-actions">
           <a class="button primary" href="#today">오늘 묵상 시작</a>
           <button class="button secondary" type="button" id="printPage">인쇄</button>
@@ -50,18 +50,18 @@
         </article>
         <article class="flow-item">
           <span class="step">02</span>
-          <h3>관찰</h3>
-          <p>반복되는 단어, 인물, 명령, 약속을 기록합니다.</p>
+          <h3>듣기</h3>
+          <p>Google Cloud TTS 음성으로 본문을 차분히 듣습니다.</p>
         </article>
         <article class="flow-item">
           <span class="step">03</span>
-          <h3>해석</h3>
-          <p>본문의 문맥과 하나님이 드러내시는 성품을 묵상합니다.</p>
+          <h3>찬송</h3>
+          <p>오늘 본문과 어울리는 찬송을 함께 연결합니다.</p>
         </article>
         <article class="flow-item">
           <span class="step">04</span>
-          <h3>적용</h3>
-          <p>오늘 순종할 한 가지 행동과 기도 제목으로 연결합니다.</p>
+          <h3>한 줄 묵상</h3>
+          <p>오늘 마음에 남은 말씀을 짧게 남깁니다.</p>
         </article>
       </div>
     </section>
@@ -81,9 +81,9 @@
 
           <label for="passageSelect">본문 선택</label>
           <select id="passageSelect">
-            <option value="psalm">시편 23:1-6</option>
-            <option value="matthew">마태복음 6:25-34</option>
-            <option value="romans">로마서 12:1-2</option>
+            <option value="john">요한복음 10:1-18</option>
+            <option value="matthew">마태복음 6:19-34</option>
+            <option value="romans">로마서 12:1-21</option>
           </select>
           <p class="daily-note" id="dailyPassageNote"></p>
 
@@ -95,9 +95,9 @@
 
           <div class="checklist" aria-label="묵상 체크리스트">
             <label><input type="checkbox" data-check="read"> 본문을 천천히 읽기</label>
-            <label><input type="checkbox" data-check="observe"> 반복 단어 표시하기</label>
-            <label><input type="checkbox" data-check="apply"> 적용 한 가지 정하기</label>
-            <label><input type="checkbox" data-check="pray"> 기도로 마무리하기</label>
+            <label><input type="checkbox" data-check="listen"> 음성으로 다시 듣기</label>
+            <label><input type="checkbox" data-check="hymn"> 오늘의 찬송 듣기</label>
+            <label><input type="checkbox" data-check="note"> 한 줄 묵상 남기기</label>
           </div>
         </aside>
 
@@ -115,8 +115,12 @@
               <p id="passageExplanation"></p>
             </div>
             <div class="reader-tools" aria-label="본문 음성 읽기">
+              <label class="api-key-field" for="googleApiKey">
+                <span>Google Cloud API Key</span>
+                <input id="googleApiKey" type="password" placeholder="브라우저에만 저장됩니다">
+              </label>
               <label class="voice-field" for="voiceSelect">
-                <span>음성</span>
+                <span>Google Cloud 음성</span>
                 <select id="voiceSelect"></select>
               </label>
               <div class="tts-controls">
@@ -128,30 +132,28 @@
             <div class="scripture-text" id="scriptureText" tabindex="0"></div>
           </article>
 
+          <article class="hymn-card" aria-labelledby="hymnTitle">
+            <div class="reader-heading">
+              <div>
+                <p class="eyebrow">Today's Hymn</p>
+                <h3 id="hymnTitle">오늘의 찬송가</h3>
+              </div>
+              <a class="mini-button hymn-link" id="hymnLink" href="#" target="_blank" rel="noreferrer">YouTube</a>
+            </div>
+            <p id="hymnDescription"></p>
+            <iframe id="hymnPreview" title="오늘의 찬송가 YouTube 미리보기" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+          </article>
+
           <form class="journal-form" id="journalForm">
             <div class="field-row">
               <label for="title">묵상 제목</label>
               <input id="title" name="title" type="text" placeholder="오늘 말씀의 제목을 적어보세요">
             </div>
 
-            <div class="note-grid">
-              <label class="note-field" for="observation">
-                <span>관찰</span>
-                <textarea id="observation" name="observation" rows="7" placeholder="본문에서 보이는 사실, 반복되는 표현, 중요한 장면"></textarea>
-              </label>
-              <label class="note-field" for="meaning">
-                <span>해석</span>
-                <textarea id="meaning" name="meaning" rows="7" placeholder="하나님, 사람, 복음, 공동체에 대해 깨닫는 점"></textarea>
-              </label>
-              <label class="note-field" for="application">
-                <span>적용</span>
-                <textarea id="application" name="application" rows="7" placeholder="오늘 순종할 구체적인 한 가지 행동"></textarea>
-              </label>
-              <label class="note-field" for="prayer">
-                <span>기도</span>
-                <textarea id="prayer" name="prayer" rows="7" placeholder="감사, 회개, 간구, 결단의 기도"></textarea>
-              </label>
-            </div>
+            <label class="note-field" for="meditation">
+              <span>한 줄 묵상</span>
+              <textarea id="meditation" name="meditation" rows="5" placeholder="오늘 본문을 듣고 마음에 남은 말씀을 한두 문장으로 적어보세요"></textarea>
+            </label>
 
             <div class="form-actions">
               <button class="button primary" type="submit">묵상 저장</button>

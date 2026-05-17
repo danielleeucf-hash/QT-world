@@ -264,7 +264,8 @@ textarea {
 
 .passage-panel,
 .journal-form,
-.scripture-reader {
+.scripture-reader,
+.hymn-card {
   padding: 24px;
 }
 
@@ -360,7 +361,8 @@ blockquote {
   padding-left: 14px;
 }
 
-.scripture-reader {
+.scripture-reader,
+.hymn-card {
   background: var(--panel);
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -411,10 +413,11 @@ blockquote {
   align-items: end;
   display: grid;
   gap: 12px;
-  grid-template-columns: minmax(220px, 1fr) minmax(260px, auto);
+  grid-template-columns: minmax(180px, 1fr) minmax(190px, 1fr) minmax(260px, auto);
   margin-bottom: 18px;
 }
 
+.api-key-field span,
 .voice-field span {
   color: var(--sage-dark);
   display: block;
@@ -461,6 +464,23 @@ blockquote {
 
 .scripture-text p {
   margin: 0;
+}
+
+.hymn-card p {
+  color: var(--muted);
+  margin: 0 0 16px;
+}
+
+.hymn-link {
+  min-width: 108px;
+}
+
+.hymn-card iframe {
+  aspect-ratio: 16 / 9;
+  border: 0;
+  border-radius: 8px;
+  display: block;
+  width: 100%;
 }
 
 .verse-number {
