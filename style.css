@@ -369,6 +369,25 @@ blockquote {
   white-space: nowrap;
 }
 
+.passage-explanation {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  margin-bottom: 14px;
+  padding: 14px;
+}
+
+.passage-explanation .label {
+  color: var(--clay);
+  font-size: 0.86rem;
+  margin: 0 0 6px;
+}
+
+.passage-explanation p:last-child {
+  color: var(--muted);
+  margin: 0;
+}
+
 .tts-controls {
   display: grid;
   gap: 8px;

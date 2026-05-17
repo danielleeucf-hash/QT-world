@@ -3,9 +3,10 @@ const passages = {
     label: "시편 23:1-6",
     keyVerse: "여호와는 나의 목자시니 내게 부족함이 없으리로다.",
     guide: "하나님의 인도와 보호를 신뢰하는 고백을 따라 오늘의 두려움과 필요를 기도로 올려드립니다.",
+    explanation: "다윗은 하나님을 목자로 고백하며 공급, 회복, 인도, 보호를 노래합니다. 환경이 평안할 때뿐 아니라 사망의 골짜기 같은 순간에도 주께서 함께하신다는 믿음이 본문의 중심입니다.",
     verses: [
       "여호와는 나의 목자시니 내게 부족함이 없으리로다",
-      "그가 나를 푸른 초장에 누이시며 쉴만한 물가으로 인도하시는도다",
+      "그가 나를 푸른 초장에 누이시며 쉴만한 물가로 인도하시는도다",
       "내 영혼을 소생시키시고 자기 이름을 위하여 의의 길로 인도하시는도다",
       "내가 사망의 음침한 골짜기로 다닐찌라도 해를 두려워하지 않을 것은 주께서 나와 함께 하심이라 주의 지팡이와 막대기가 나를 안위하시나이다",
       "주께서 내 원수의 목전에서 내게 상을 베푸시고 기름으로 내 머리에 바르셨으니 내 잔이 넘치나이다",
@@ -16,6 +17,7 @@ const passages = {
     label: "마태복음 6:25-34",
     keyVerse: "너희는 먼저 그의 나라와 그의 의를 구하라.",
     guide: "염려를 내려놓고 하나님 나라의 우선순위로 하루를 재정렬합니다.",
+    explanation: "예수님은 먹고 입는 문제에 붙잡힌 마음을 하나님 아버지의 돌보심으로 돌이키십니다. 본문은 무책임하게 살라는 말이 아니라, 염려가 아닌 신뢰 안에서 먼저 하나님 나라를 구하라는 초대입니다.",
     verses: [
       "그러므로 내가 너희에게 이르노니 목숨을 위하여 무엇을 먹을까 무엇을 마실까 몸을 위하여 무엇을 입을까 염려하지 말라 목숨이 음식보다 중하지 아니하며 몸이 의복보다 중하지 아니하냐",
       "공중의 새를 보라 심지도 않고 거두지도 않고 창고에 모아 들이지도 아니하되 너희 천부께서 기르시나니 너희는 이것들보다 귀하지 아니하냐",
@@ -33,6 +35,7 @@ const passages = {
     label: "로마서 12:1-2",
     keyVerse: "너희 몸을 하나님이 기뻐하시는 거룩한 산 제물로 드리라.",
     guide: "예배가 일상의 생각과 선택을 새롭게 하는 방식으로 이어지도록 묵상합니다.",
+    explanation: "바울은 하나님의 자비를 받은 성도의 삶을 예배로 설명합니다. 예배는 특정 시간의 의식에 머물지 않고, 세상의 방식에서 벗어나 마음이 새로워지고 하나님의 뜻을 분별하는 일상으로 확장됩니다.",
     verses: [
       "그러므로 형제들아 내가 하나님의 모든 자비하심으로 너희를 권하노니 너희 몸을 하나님이 기뻐하시는 거룩한 산 제사로 드리라 이는 너희의 드릴 영적 예배니라",
       "너희는 이 세대를 본받지 말고 오직 마음을 새롭게 함으로 변화를 받아 하나님의 선하시고 기뻐하시고 온전하신 뜻이 무엇인지 분별하도록 하라"
@@ -45,6 +48,7 @@ const form = document.querySelector("#journalForm");
 const passageSelect = document.querySelector("#passageSelect");
 const keyVerse = document.querySelector("#keyVerse");
 const passageGuide = document.querySelector("#passageGuide");
+const passageExplanation = document.querySelector("#passageExplanation");
 const scriptureText = document.querySelector("#scriptureText");
 const ttsStatus = document.querySelector("#ttsStatus");
 const playTts = document.querySelector("#playTts");
@@ -111,6 +115,7 @@ function updatePassage() {
   stopReading();
   keyVerse.textContent = selected.keyVerse;
   passageGuide.textContent = selected.guide;
+  passageExplanation.textContent = selected.explanation;
   renderScripture(selected);
 }
 
@@ -216,9 +221,37 @@ function setTtsState(state) {
 
 function getKoreanVoice() {
   const voices = speechSynthesis.getVoices();
-  return voices.find((voice) => voice.lang === "ko-KR")
-    || voices.find((voice) => voice.lang.startsWith("ko"))
-    || null;
+  const koreanVoices = voices.filter((voice) => voice.lang.toLowerCase().startsWith("ko"));
+
+  if (koreanVoices.length === 0) {
+    return null;
+  }
+
+  const softVoiceHints = [
+    "female",
+    "woman",
+    "natural",
+    "neural",
+    "premium",
+    "google",
+    "microsoft",
+    "yuna",
+    "sora",
+    "sunhi",
+    "heami",
+    "kyung"
+  ];
+
+  return koreanVoices
+    .map((voice) => {
+      const name = `${voice.name} ${voice.voiceURI}`.toLowerCase();
+      const score = softVoiceHints.reduce((total, hint) => (
+        name.includes(hint) ? total + 1 : total
+      ), voice.lang === "ko-KR" ? 2 : 0);
+
+      return { voice, score };
+    })
+    .sort((first, second) => second.score - first.score)[0].voice;
 }
 
 function stopReading() {
@@ -248,8 +281,9 @@ function readSelectedPassage() {
   const voice = getKoreanVoice();
 
   utterance.lang = "ko-KR";
-  utterance.rate = 0.88;
-  utterance.pitch = 1;
+  utterance.rate = 0.82;
+  utterance.pitch = 0.92;
+  utterance.volume = 0.92;
 
   if (voice) {
     utterance.voice = voice;
@@ -282,6 +316,11 @@ playTts.addEventListener("click", readSelectedPassage);
 pauseTts.addEventListener("click", pauseReading);
 stopTts.addEventListener("click", stopReading);
 window.addEventListener("beforeunload", stopReading);
+if ("speechSynthesis" in window) {
+  speechSynthesis.addEventListener("voiceschanged", () => {
+    getKoreanVoice();
+  });
+}
 savedList.addEventListener("click", (event) => {
   const button = event.target.closest("[data-id]");
   if (button) {
