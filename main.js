@@ -99,7 +99,7 @@ const passages = {
 };
 
 const storageKey = "qt-world-journal";
-const googleNaturalVoice = "ko-KR-Chirp3-HD-Achernar";
+const azureVoiceName = "ko-KR-SunHiNeural";
 const passageOrder = Object.keys(passages);
 const form = document.querySelector("#journalForm");
 const passageSelect = document.querySelector("#passageSelect");
@@ -340,7 +340,7 @@ function setTtsState(state) {
   pauseTts.classList.toggle("is-active", state === "paused");
   ttsStatus.textContent = {
     idle: "읽기 대기",
-    loading: "Google TTS 준비 중",
+    loading: "Azure TTS 준비 중",
     playing: "읽는 중",
     paused: "일시정지",
     fallback: "브라우저 TTS",
@@ -348,7 +348,7 @@ function setTtsState(state) {
   }[state];
 }
 
-let googleAudio = null;
+let ttsAudio = null;
 let readingQueue = [];
 let readingIndex = 0;
 let stopRequested = false;
@@ -360,10 +360,10 @@ function stopReading() {
   readingQueue = [];
   readingIndex = 0;
 
-  if (googleAudio) {
-    googleAudio.pause();
-    googleAudio.currentTime = 0;
-    googleAudio = null;
+  if (ttsAudio) {
+    ttsAudio.pause();
+    ttsAudio.currentTime = 0;
+    ttsAudio = null;
   }
 
   if ("speechSynthesis" in window) {
@@ -427,58 +427,59 @@ function readWithBrowserTts(text, isLastSegment = true) {
   });
 }
 
-async function readWithGoogleCloud(text, isLastSegment = true) {
-  const apiKey = window.QT_GOOGLE_TTS_API_KEY || "";
+function escapeXml(value) {
+  return value.replace(/[<>&'"]/g, (character) => ({
+    "<": "&lt;",
+    ">": "&gt;",
+    "&": "&amp;",
+    "'": "&apos;",
+    "\"": "&quot;"
+  })[character]);
+}
 
-  if (!apiKey) {
+async function readWithAzureTts(text, isLastSegment = true) {
+  const apiKey = window.QT_AZURE_TTS_KEY || "";
+  const region = window.QT_AZURE_TTS_REGION || "";
+
+  if (!apiKey || !region) {
     await readWithBrowserTts(text, isLastSegment);
     return;
   }
 
   setTtsState("loading");
 
-  const response = await fetch(`https://texttospeech.googleapis.com/v1/text:synthesize?key=${encodeURIComponent(apiKey)}`, {
+  const response = await fetch(`https://${encodeURIComponent(region)}.tts.speech.microsoft.com/cognitiveservices/v1`, {
     method: "POST",
     headers: {
-      "Content-Type": "application/json"
+      "Content-Type": "application/ssml+xml",
+      "Ocp-Apim-Subscription-Key": apiKey,
+      "X-Microsoft-OutputFormat": "audio-24khz-48kbitrate-mono-mp3"
     },
-    body: JSON.stringify({
-      input: { text },
-      voice: {
-        languageCode: "ko-KR",
-        name: googleNaturalVoice
-      },
-      audioConfig: {
-        audioEncoding: "MP3",
-        speakingRate: 0.86,
-        pitch: -1,
-        volumeGainDb: 0
-      }
-    })
+    body: `<speak version="1.0" xml:lang="ko-KR"><voice xml:lang="ko-KR" name="${azureVoiceName}"><prosody rate="-8%" pitch="-2%">${escapeXml(text)}</prosody></voice></speak>`
   });
 
   if (!response.ok) {
-    throw new Error("Google Cloud TTS request failed");
+    throw new Error("Azure TTS request failed");
   }
 
-  const result = await response.json();
-  googleAudio = new Audio(`data:audio/mp3;base64,${result.audioContent}`);
-  googleAudio.onplay = () => setTtsState("playing");
-  googleAudio.onended = () => {
+  const audioBlob = await response.blob();
+  ttsAudio = new Audio(URL.createObjectURL(audioBlob));
+  ttsAudio.onplay = () => setTtsState("playing");
+  ttsAudio.onended = () => {
     if (isLastSegment) {
       setTtsState("idle");
     }
   };
-  googleAudio.onerror = () => setTtsState("idle");
+  ttsAudio.onerror = () => setTtsState("idle");
   await new Promise((resolve, reject) => {
-    googleAudio.onended = () => {
+    ttsAudio.onended = () => {
       if (isLastSegment) {
         setTtsState("idle");
       }
       resolve();
     };
-    googleAudio.onerror = reject;
-    googleAudio.play().catch(reject);
+    ttsAudio.onerror = reject;
+    ttsAudio.play().catch(reject);
   });
 }
 
@@ -495,7 +496,7 @@ async function playReadingQueue() {
     const isLastSegment = readingIndex === readingQueue.length - 1;
 
     try {
-      await readWithGoogleCloud(segment, isLastSegment);
+      await readWithAzureTts(segment, isLastSegment);
     } catch {
       await readWithBrowserTts(segment, isLastSegment);
     }
@@ -516,9 +517,9 @@ async function playReadingQueue() {
 }
 
 async function readSelectedPassage() {
-  if (googleAudio && googleAudio.paused && googleAudio.currentTime > 0) {
+  if (ttsAudio && ttsAudio.paused && ttsAudio.currentTime > 0) {
     pauseRequested = false;
-    await googleAudio.play();
+    await ttsAudio.play();
     return;
   }
 
@@ -541,8 +542,8 @@ async function readSelectedPassage() {
 }
 
 function pauseReading() {
-  if (googleAudio && !googleAudio.paused) {
-    googleAudio.pause();
+  if (ttsAudio && !ttsAudio.paused) {
+    ttsAudio.pause();
     pauseRequested = true;
     setTtsState("paused");
     return;

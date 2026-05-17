@@ -1,11 +1,11 @@
 # QT World
 
-매일 바뀌는 말씀 본문, Google Cloud TTS, 오늘의 찬송가, 한 줄 묵상을 돕는 정적 웹사이트입니다.
+매일 바뀌는 말씀 본문, Microsoft Azure TTS, 오늘의 찬송가, 한 줄 묵상을 돕는 정적 웹사이트입니다.
 
 ## 기능
 
 - 오늘 날짜 기준 묵상 본문 자동 변경
-- Google Cloud Text-to-Speech 기반 본문 읽기
+- Microsoft Azure ko-KR-SunHiNeural 기반 본문 읽기
 - 오늘 본문과 어울리는 YouTube 찬송가 미리보기
 - 한 줄 묵상 저장
 - 브라우저 로컬 저장소 기반 묵상 기록 저장
