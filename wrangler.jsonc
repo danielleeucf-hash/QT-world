@@ -1,0 +1,26 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "qtworld",
+  "main": "src/worker.js",
+  "compatibility_date": "2026-05-17",
+  "workers_dev": true,
+  "assets": {
+    "directory": ".",
+    "not_found_handling": "single-page-application",
+    "binding": "ASSETS"
+  },
+  "triggers": {
+    "crons": [
+      "0 21 * * *"
+    ]
+  },
+  "kv_namespaces": [
+    {
+      "binding": "QT_KV",
+      "id": "REPLACE_WITH_QT_KV_NAMESPACE_ID"
+    }
+  ],
+  "observability": {
+    "enabled": true
+  }
+}

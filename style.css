@@ -332,6 +332,13 @@ input {
   margin: 10px 0 0;
 }
 
+.api-message {
+  color: var(--clay);
+  font-size: 0.9rem;
+  font-weight: 700;
+  margin: 8px 0 0;
+}
+
 textarea {
   min-height: 150px;
   padding: 14px;
@@ -409,6 +416,25 @@ blockquote {
   margin: 0;
 }
 
+.daily-devotion-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-bottom: 16px;
+}
+
+.daily-devotion-grid section {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.daily-devotion-grid p:last-child {
+  color: var(--muted);
+  margin: 6px 0 0;
+}
+
 .reader-tools {
   align-items: end;
   display: grid;
@@ -484,6 +510,12 @@ blockquote {
 .hymn-card p {
   color: var(--muted);
   margin: 0 0 16px;
+}
+
+.hymn-card .hymn-meta {
+  color: var(--clay);
+  font-weight: 800;
+  margin-top: -6px;
 }
 
 .hymn-link {
@@ -608,7 +640,8 @@ blockquote {
   .flow-grid,
   .workspace,
   .note-grid,
-  .reader-tools {
+  .reader-tools,
+  .daily-devotion-grid {
     grid-template-columns: 1fr;
   }
 

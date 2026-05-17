@@ -86,6 +86,7 @@
             <option value="romans">로마서 12:1-21</option>
           </select>
           <p class="daily-note" id="dailyPassageNote"></p>
+          <p class="api-message" id="todayApiMessage" role="status"></p>
 
           <div class="passage-summary">
             <p class="label">핵심 구절</p>
@@ -111,8 +112,18 @@
               <span id="ttsStatus">읽기 대기</span>
             </div>
             <div class="passage-explanation">
-              <p class="label">본문 설명</p>
+              <p class="label">묵상</p>
               <p id="passageExplanation"></p>
+            </div>
+            <div class="daily-devotion-grid">
+              <section>
+                <p class="label">적용</p>
+                <p id="todayApplication"></p>
+              </section>
+              <section>
+                <p class="label">기도</p>
+                <p id="todayPrayer"></p>
+              </section>
             </div>
             <div class="reader-tools" aria-label="본문 음성 읽기">
               <label class="api-key-field" for="googleApiKey">
@@ -141,6 +152,7 @@
               <a class="mini-button hymn-link" id="hymnLink" href="#" target="_blank" rel="noreferrer">YouTube</a>
             </div>
             <p id="hymnDescription"></p>
+            <p class="hymn-meta" id="hymnMeta"></p>
             <iframe id="hymnPreview" title="오늘의 찬송가 YouTube 미리보기" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
           </article>
 

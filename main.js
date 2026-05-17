@@ -114,9 +114,12 @@ const googleVoices = [
 const form = document.querySelector("#journalForm");
 const passageSelect = document.querySelector("#passageSelect");
 const dailyPassageNote = document.querySelector("#dailyPassageNote");
+const todayApiMessage = document.querySelector("#todayApiMessage");
 const keyVerse = document.querySelector("#keyVerse");
 const passageGuide = document.querySelector("#passageGuide");
 const passageExplanation = document.querySelector("#passageExplanation");
+const todayApplication = document.querySelector("#todayApplication");
+const todayPrayer = document.querySelector("#todayPrayer");
 const scriptureText = document.querySelector("#scriptureText");
 const ttsStatus = document.querySelector("#ttsStatus");
 const googleApiKey = document.querySelector("#googleApiKey");
@@ -126,12 +129,14 @@ const pauseTts = document.querySelector("#pauseTts");
 const stopTts = document.querySelector("#stopTts");
 const hymnLink = document.querySelector("#hymnLink");
 const hymnDescription = document.querySelector("#hymnDescription");
+const hymnMeta = document.querySelector("#hymnMeta");
 const hymnPreview = document.querySelector("#hymnPreview");
 const savedList = document.querySelector("#savedList");
 const todayDate = document.querySelector("#todayDate");
 const dayName = document.querySelector("#dayName");
 const printPage = document.querySelector("#printPage");
 const clearForm = document.querySelector("#clearForm");
+let activeDevotion = null;
 
 const dateFormatter = new Intl.DateTimeFormat("ko-KR", {
   year: "numeric",
@@ -169,6 +174,30 @@ function getSelectedPassage() {
   return passages[passageSelect.value];
 }
 
+function getActiveDevotion() {
+  return activeDevotion || getSelectedPassage();
+}
+
+function normalizeApiDevotion(data) {
+  return {
+    label: data.passage,
+    keyVerse: data.keyVerse,
+    guide: data.title,
+    explanation: data.meditation,
+    application: data.application,
+    prayer: data.prayer,
+    verses: data.scripture,
+    hymn: {
+      number: data.hymn?.number || "",
+      title: data.hymn?.title || "오늘의 찬송가",
+      description: "오늘 본문과 어울리는 찬송입니다. 저작권 보호를 위해 가사 전체는 표시하지 않습니다.",
+      url: data.hymn?.youtubeUrl || "#",
+      embed: data.hymn?.embedUrl || ""
+    },
+    sourceDate: data.date
+  };
+}
+
 function renderScripture(selected) {
   scriptureText.innerHTML = selected.verses
     .map((verse, index) => `
@@ -193,14 +222,47 @@ function initDailyPassage() {
   dailyPassageNote.textContent = `오늘의 기본 묵상 본문은 ${passages[dailyKey].label}입니다.`;
 }
 
-function updatePassage() {
-  const selected = getSelectedPassage();
+function updatePassage(devotion = getSelectedPassage()) {
+  const selected = devotion;
+  activeDevotion = selected;
   stopReading();
   keyVerse.textContent = selected.keyVerse;
   passageGuide.textContent = selected.guide;
   passageExplanation.textContent = selected.explanation;
+  todayApplication.textContent = selected.application || "오늘 본문을 따라 실천할 한 가지를 정해보세요.";
+  todayPrayer.textContent = selected.prayer || "말씀에 응답하는 짧은 기도로 하루를 시작하세요.";
+  if (selected.sourceDate) {
+    dailyPassageNote.textContent = `${selected.sourceDate} 대만 시간 기준 오늘의 묵상 본문은 ${selected.label}입니다.`;
+  }
   renderScripture(selected);
   renderHymn(selected);
+}
+
+async function loadTodayDevotion() {
+  try {
+    const response = await fetch("/api/today", {
+      headers: { accept: "application/json" }
+    });
+
+    if (!response.ok) {
+      todayApiMessage.textContent = "오늘의 자동 묵상 데이터가 아직 없습니다. 기본 본문을 표시합니다.";
+      updatePassage();
+      return;
+    }
+
+    const payload = await response.json();
+    if (!payload.ok || !payload.data) {
+      todayApiMessage.textContent = payload.message || "오늘의 자동 묵상 데이터가 아직 없습니다.";
+      updatePassage();
+      return;
+    }
+
+    todayApiMessage.textContent = "KV에서 오늘의 자동 묵상 데이터를 불러왔습니다.";
+    updatePassage(normalizeApiDevotion(payload.data));
+  } catch {
+    todayApiMessage.textContent = "오늘의 자동 묵상 API에 연결할 수 없어 기본 본문을 표시합니다.";
+    updatePassage();
+  }
 }
 
 function resetForm() {
@@ -254,7 +316,7 @@ function renderNotes() {
 function saveNote(event) {
   event.preventDefault();
   const data = new FormData(form);
-  const selected = passages[passageSelect.value];
+  const selected = getActiveDevotion();
   const note = {
     id: crypto.randomUUID(),
     createdAt: new Date().toISOString(),
@@ -499,7 +561,7 @@ async function readSelectedPassage() {
     return;
   }
 
-  const selected = getSelectedPassage();
+  const selected = getActiveDevotion();
   readingQueue = getReadableScripture(selected);
   readingIndex = 0;
   await playReadingQueue();
@@ -529,7 +591,8 @@ function renderHymn(selected) {
   hymnLink.href = selected.hymn.url;
   hymnLink.textContent = "YouTube";
   hymnDescription.textContent = `${selected.hymn.title} - ${selected.hymn.description}`;
-  hymnPreview.src = selected.hymn.embed;
+  hymnMeta.textContent = selected.hymn.number ? `찬송가 번호/분류: ${selected.hymn.number}` : "";
+  hymnPreview.src = selected.hymn.embed || "about:blank";
 }
 
 function initGoogleTtsSettings() {
@@ -537,7 +600,7 @@ function initGoogleTtsSettings() {
   populateVoiceSelect();
 }
 
-passageSelect.addEventListener("change", updatePassage);
+passageSelect.addEventListener("change", () => updatePassage());
 form.addEventListener("submit", saveNote);
 clearForm.addEventListener("click", resetForm);
 printPage.addEventListener("click", () => window.print());
@@ -562,5 +625,5 @@ savedList.addEventListener("click", (event) => {
 initDate();
 initDailyPassage();
 initGoogleTtsSettings();
-updatePassage();
+loadTodayDevotion();
 renderNotes();
