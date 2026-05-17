@@ -535,26 +535,6 @@ blockquote {
   margin-right: 6px;
 }
 
-.checklist {
-  display: grid;
-  gap: 12px;
-}
-
-.checklist label {
-  align-items: center;
-  color: var(--ink);
-  display: flex;
-  gap: 10px;
-  font-weight: 600;
-}
-
-.checklist input {
-  accent-color: var(--sage);
-  height: 18px;
-  min-height: auto;
-  width: 18px;
-}
-
 .field-row {
   margin-bottom: 18px;
 }
@@ -687,7 +667,6 @@ blockquote {
 @media print {
   .site-header,
   .hero,
-  .intro,
   .site-footer,
   .button,
   .delete-note {

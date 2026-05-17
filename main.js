@@ -3,7 +3,7 @@ const passages = {
     label: "요한복음 10:1-18",
     keyVerse: "나는 선한 목자라 선한 목자는 양들을 위하여 목숨을 버리거니와.",
     guide: "선한 목자이신 예수님의 음성을 분별하고 그분의 생명 안에 머무는 하루를 묵상합니다.",
-    explanation: "예수님은 자신을 양의 문이자 선한 목자로 계시하십니다. 삯군은 위험 앞에서 도망하지만, 선한 목자는 양을 알고 양을 위해 목숨을 내어놓습니다.",
+    explanation: "예수님은 자신을 양의 문이자 선한 목자로 계시하십니다. 문이신 예수님을 통과한다는 것은 다른 길로 생명과 안전을 얻으려는 시도를 내려놓고, 그분이 열어 주시는 구원의 길 안으로 들어가는 것입니다. 삯군은 위험 앞에서 자기 안전을 먼저 계산하지만, 선한 목자는 양을 알고 양을 위해 목숨을 내어놓습니다. 이 본문은 우리가 주님의 음성을 실제로 듣고 따르는 사람인지, 아니면 두려움과 낯선 소리에 더 빨리 반응하는 사람인지 묻게 합니다. 오늘의 묵상은 주님이 나를 알고 계신다는 위로에서 시작해, 나도 주님의 음성을 알아듣는 삶으로 나아가게 합니다.",
     hymn: {
       title: "여호와는 나의 목자니",
       description: "선한 목자이신 주님의 인도와 보호를 묵상하기에 어울리는 찬송입니다.",
@@ -35,7 +35,7 @@ const passages = {
     label: "마태복음 6:19-34",
     keyVerse: "너희는 먼저 그의 나라와 그의 의를 구하라.",
     guide: "염려를 내려놓고 하나님 나라의 우선순위로 하루를 재정렬합니다.",
-    explanation: "예수님은 재물, 시선, 염려의 문제를 하나님 나라의 우선순위로 다시 세우십니다. 마음의 보물이 어디 있는지가 오늘의 선택을 결정합니다.",
+    explanation: "예수님은 재물, 시선, 염려의 문제를 한 흐름으로 다루시며 마음의 방향을 하나님 나라로 돌리십니다. 땅에 쌓는 보물은 쉽게 손상되고 빼앗기지만, 하늘에 쌓는 보물은 하나님 앞에서 사라지지 않는 가치로 남습니다. 염려는 현실의 필요를 무시해서 생기는 것이 아니라, 필요를 아시는 아버지를 잊을 때 커집니다. 공중의 새와 들의 백합화는 무책임의 예가 아니라 돌보시는 하나님을 바라보라는 표지입니다. 오늘의 묵상은 내 마음을 붙드는 걱정이 무엇인지 살피고, 그 걱정보다 먼저 구해야 할 하나님의 나라와 의를 다시 선택하게 합니다.",
     hymn: {
       title: "먼저 그 나라와 의를 구하라",
       description: "염려보다 하나님 나라를 먼저 구하라는 오늘 본문과 직접 연결되는 찬양입니다.",
@@ -65,7 +65,7 @@ const passages = {
     label: "로마서 12:1-21",
     keyVerse: "너희 몸을 하나님이 기뻐하시는 거룩한 산 제물로 드리라.",
     guide: "예배가 일상의 생각과 선택을 새롭게 하는 방식으로 이어지도록 묵상합니다.",
-    explanation: "바울은 하나님의 자비를 받은 성도의 삶을 산 제사로 설명합니다. 이 예배는 공동체 안의 섬김, 사랑, 원수까지 품는 선으로 확장됩니다.",
+    explanation: "바울은 하나님의 자비를 받은 성도의 삶을 산 제사로 설명합니다. 예배는 특정한 장소와 시간에만 머무는 의식이 아니라, 몸과 생각과 관계 전체가 하나님께 드려지는 삶입니다. 마음을 새롭게 한다는 것은 세상의 기준을 조금 더 종교적으로 포장하는 것이 아니라, 하나님의 선하시고 기뻐하시고 온전하신 뜻을 분별하도록 내면의 기준이 바뀌는 일입니다. 그래서 이 본문은 은사 사용, 형제 사랑, 손 대접, 핍박하는 자를 향한 축복, 원수에게까지 선을 베푸는 삶으로 이어집니다. 오늘의 묵상은 내가 드리는 예배가 말과 감정에 머물지 않고 실제 관계 속에서 선으로 악을 이기는 모습으로 나타나는지 돌아보게 합니다.",
     hymn: {
       title: "정결한 맘 주시옵소서",
       description: "마음의 새로움과 하나님의 뜻 분별을 구하는 오늘 본문에 어울리는 찬양입니다.",
@@ -99,7 +99,7 @@ const passages = {
 };
 
 const storageKey = "qt-world-journal";
-const clovaDubbingVoice = "nara";
+const azureVoiceName = "ko-KR-HyunsuNeural";
 const passageOrder = Object.keys(passages);
 const form = document.querySelector("#journalForm");
 const passageSelect = document.querySelector("#passageSelect");
@@ -341,7 +341,7 @@ function setTtsState(state) {
   pauseTts.classList.toggle("is-active", state === "paused");
   ttsStatus.textContent = {
     idle: "읽기 대기",
-    loading: "CLOVA Dubbing 준비 중",
+    loading: "Azure TTS 준비 중",
     playing: "읽는 중",
     paused: "일시정지",
     fallback: "브라우저 TTS",
@@ -451,32 +451,39 @@ function readWithBrowserTts(text, isLastSegment = true) {
   });
 }
 
-async function readWithClovaDubbing(text, isLastSegment = true) {
-  const endpoint = window.QT_CLOVA_DUBBING_ENDPOINT || "";
-  const apiKey = window.QT_CLOVA_DUBBING_KEY || "";
+function escapeXml(value) {
+  return value.replace(/[<>&'"]/g, (character) => ({
+    "<": "&lt;",
+    ">": "&gt;",
+    "&": "&amp;",
+    "'": "&apos;",
+    "\"": "&quot;"
+  })[character]);
+}
 
-  if (!endpoint || !apiKey) {
+async function readWithAzureTts(text, isLastSegment = true) {
+  const apiKey = window.QT_AZURE_TTS_KEY || "";
+  const region = window.QT_AZURE_TTS_REGION || "";
+
+  if (!apiKey || !region) {
     await readWithBrowserTts(text, isLastSegment);
     return;
   }
 
   setTtsState("loading");
 
-  const response = await fetch(endpoint, {
+  const response = await fetch(`https://${encodeURIComponent(region)}.tts.speech.microsoft.com/cognitiveservices/v1`, {
     method: "POST",
     headers: {
-      "Content-Type": "application/json",
-      "Authorization": `Bearer ${apiKey}`
+      "Content-Type": "application/ssml+xml",
+      "Ocp-Apim-Subscription-Key": apiKey,
+      "X-Microsoft-OutputFormat": "audio-24khz-48kbitrate-mono-mp3"
     },
-    body: JSON.stringify({
-      text,
-      voice: clovaDubbingVoice,
-      format: "mp3"
-    })
+    body: `<speak version="1.0" xml:lang="ko-KR"><voice xml:lang="ko-KR" name="${azureVoiceName}"><prosody rate="-8%" pitch="-2%">${escapeXml(text)}</prosody></voice></speak>`
   });
 
   if (!response.ok) {
-    throw new Error("CLOVA Dubbing request failed");
+    throw new Error("Azure TTS request failed");
   }
 
   const audioBlob = await response.blob();
@@ -514,7 +521,7 @@ async function playReadingQueue() {
     markReadingVerse(readingIndex);
 
     try {
-      await readWithClovaDubbing(segment, isLastSegment);
+      await readWithAzureTts(segment, isLastSegment);
     } catch {
       await readWithBrowserTts(segment, isLastSegment);
     }

@@ -1,11 +1,11 @@
 # QT World
 
-매일 바뀌는 말씀 본문, Naver CLOVA Dubbing, 명상음악, 오늘의 찬송가, 한 줄 묵상을 돕는 정적 웹사이트입니다.
+매일 바뀌는 말씀 본문, Microsoft Azure HyunsuNeural TTS, 명상음악, 오늘의 찬송가, 한 줄 묵상을 돕는 정적 웹사이트입니다.
 
 ## 기능
 
 - 오늘 날짜 기준 묵상 본문 자동 변경
-- Naver CLOVA Dubbing 기반 본문 읽기
+- Microsoft Azure ko-KR-HyunsuNeural 기반 본문 읽기
 - `reading-text.js`에서 화면 본문과 별도의 쉼표 포함 읽기 문장 관리
 - Creative Commons Attribution 4.0 라이선스의 잔잔한 피아노 명상음악 재생
 - 오늘 본문과 어울리는 YouTube 찬송가 미리보기
