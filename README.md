@@ -6,7 +6,8 @@
 
 - 오늘 날짜 기준 묵상 본문 자동 변경
 - Naver CLOVA Dubbing 기반 본문 읽기
-- 브라우저 Web Audio 기반 잔잔한 명상음악 재생
+- `reading-text.js`에서 화면 본문과 별도의 쉼표 포함 읽기 문장 관리
+- Creative Commons Attribution 4.0 라이선스의 잔잔한 피아노 명상음악 재생
 - 오늘 본문과 어울리는 YouTube 찬송가 미리보기
 - 한 줄 묵상 저장
 - 브라우저 로컬 저장소 기반 묵상 기록 저장

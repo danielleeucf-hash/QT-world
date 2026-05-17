@@ -196,7 +196,7 @@ function renderScripture(selected) {
 }
 
 function getReadableScripture(selected) {
-  return selected.verses;
+  return window.QT_READING_TEXTS?.[selected.label] || selected.verses;
 }
 
 function getDailyPassageKey(date = new Date()) {
@@ -350,8 +350,7 @@ function setTtsState(state) {
 }
 
 let ttsAudio = null;
-let meditationContext = null;
-let meditationNodes = [];
+let meditationAudio = null;
 let meditationPlaying = false;
 let readingQueue = [];
 let readingIndex = 0;
@@ -563,53 +562,22 @@ function stopMeditationMusic() {
     return;
   }
 
-  meditationNodes.forEach((node) => {
-    if (node.gain) {
-      node.gain.gain.setTargetAtTime(0, meditationContext.currentTime, 0.4);
-    }
-    if (node.oscillator) {
-      window.setTimeout(() => node.oscillator.stop(), 700);
-    }
-  });
+  if (meditationAudio) {
+    meditationAudio.pause();
+    meditationAudio.currentTime = 0;
+  }
 
-  meditationNodes = [];
   meditationPlaying = false;
   playMeditation.classList.remove("is-active");
   playMeditation.textContent = "명상음악 듣기";
 }
 
 function startMeditationMusic() {
-  const AudioContext = window.AudioContext || window.webkitAudioContext;
-
-  if (!AudioContext) {
-    return;
-  }
-
-  meditationContext = meditationContext || new AudioContext();
-  const frequencies = [196, 246.94, 329.63];
-  const masterGain = meditationContext.createGain();
-  masterGain.gain.setValueAtTime(0.035, meditationContext.currentTime);
-  masterGain.connect(meditationContext.destination);
-
-  meditationNodes = frequencies.map((frequency, index) => {
-    const oscillator = meditationContext.createOscillator();
-    const gain = meditationContext.createGain();
-    const filter = meditationContext.createBiquadFilter();
-
-    oscillator.type = "sine";
-    oscillator.frequency.setValueAtTime(frequency, meditationContext.currentTime);
-    oscillator.detune.setValueAtTime(index * 4, meditationContext.currentTime);
-    filter.type = "lowpass";
-    filter.frequency.setValueAtTime(900, meditationContext.currentTime);
-    gain.gain.setValueAtTime(0, meditationContext.currentTime);
-    gain.gain.linearRampToValueAtTime(0.16 / (index + 1), meditationContext.currentTime + 1.8);
-
-    oscillator.connect(filter);
-    filter.connect(gain);
-    gain.connect(masterGain);
-    oscillator.start();
-
-    return { oscillator, gain };
+  meditationAudio = meditationAudio || new Audio("https://www.orangefreesounds.com/wp-content/uploads/2018/08/Calming-piano-music.mp3");
+  meditationAudio.loop = true;
+  meditationAudio.volume = 0.28;
+  meditationAudio.play().catch(() => {
+    playMeditation.textContent = "재생 실패";
   });
 
   meditationPlaying = true;

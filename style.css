@@ -450,6 +450,19 @@ blockquote {
   margin: 0;
 }
 
+.music-credit {
+  color: var(--muted);
+  font-size: 0.86rem;
+  margin: -2px 0 0;
+}
+
+.music-credit a {
+  color: var(--sage-dark);
+  font-weight: 800;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
 .tts-controls {
   display: grid;
   gap: 8px;
