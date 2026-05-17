@@ -205,8 +205,7 @@ textarea {
   margin: 0;
 }
 
-.flow-grid,
-.source-grid {
+.flow-grid {
   display: grid;
   gap: 16px;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -215,7 +214,6 @@ textarea {
 }
 
 .flow-item,
-.source-card,
 .passage-panel,
 .journal-form,
 .saved-entry {
@@ -237,15 +235,13 @@ textarea {
   margin-bottom: 28px;
 }
 
-.flow-item h3,
-.source-card strong {
+.flow-item h3 {
   display: block;
   font-size: 1.22rem;
   margin: 0 0 8px;
 }
 
 .flow-item p,
-.source-card span,
 .passage-summary p,
 .saved-entry p,
 .site-footer {
@@ -422,16 +418,6 @@ blockquote {
   padding: 0 14px;
 }
 
-.source-card {
-  min-height: 148px;
-  padding: 22px;
-}
-
-.source-card:hover {
-  border-color: var(--sage);
-  box-shadow: var(--shadow);
-}
-
 .site-footer {
   border-top: 1px solid var(--line);
   padding: 28px 5vw;
@@ -457,7 +443,6 @@ blockquote {
   }
 
   .flow-grid,
-  .source-grid,
   .workspace,
   .note-grid {
     grid-template-columns: 1fr;
@@ -492,7 +477,6 @@ blockquote {
   .site-header,
   .hero,
   .intro,
-  .sources,
   .site-footer,
   .button,
   .delete-note {
