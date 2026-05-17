@@ -453,7 +453,7 @@ blockquote {
 .tts-controls {
   display: grid;
   gap: 8px;
-  grid-template-columns: repeat(3, minmax(84px, 1fr));
+  grid-template-columns: repeat(4, minmax(84px, 1fr));
 }
 
 .mini-button {

@@ -99,7 +99,7 @@ const passages = {
 };
 
 const storageKey = "qt-world-journal";
-const azureVoiceName = "ko-KR-SunHiNeural";
+const clovaDubbingVoice = "nara";
 const passageOrder = Object.keys(passages);
 const form = document.querySelector("#journalForm");
 const passageSelect = document.querySelector("#passageSelect");
@@ -113,6 +113,7 @@ const todayPrayer = document.querySelector("#todayPrayer");
 const scriptureText = document.querySelector("#scriptureText");
 const ttsStatus = document.querySelector("#ttsStatus");
 const playTts = document.querySelector("#playTts");
+const playMeditation = document.querySelector("#playMeditation");
 const pauseTts = document.querySelector("#pauseTts");
 const stopTts = document.querySelector("#stopTts");
 const hymnLink = document.querySelector("#hymnLink");
@@ -340,7 +341,7 @@ function setTtsState(state) {
   pauseTts.classList.toggle("is-active", state === "paused");
   ttsStatus.textContent = {
     idle: "읽기 대기",
-    loading: "Azure TTS 준비 중",
+    loading: "CLOVA Dubbing 준비 중",
     playing: "읽는 중",
     paused: "일시정지",
     fallback: "브라우저 TTS",
@@ -349,6 +350,9 @@ function setTtsState(state) {
 }
 
 let ttsAudio = null;
+let meditationContext = null;
+let meditationNodes = [];
+let meditationPlaying = false;
 let readingQueue = [];
 let readingIndex = 0;
 let stopRequested = false;
@@ -427,39 +431,32 @@ function readWithBrowserTts(text, isLastSegment = true) {
   });
 }
 
-function escapeXml(value) {
-  return value.replace(/[<>&'"]/g, (character) => ({
-    "<": "&lt;",
-    ">": "&gt;",
-    "&": "&amp;",
-    "'": "&apos;",
-    "\"": "&quot;"
-  })[character]);
-}
+async function readWithClovaDubbing(text, isLastSegment = true) {
+  const endpoint = window.QT_CLOVA_DUBBING_ENDPOINT || "";
+  const apiKey = window.QT_CLOVA_DUBBING_KEY || "";
 
-async function readWithAzureTts(text, isLastSegment = true) {
-  const apiKey = window.QT_AZURE_TTS_KEY || "";
-  const region = window.QT_AZURE_TTS_REGION || "";
-
-  if (!apiKey || !region) {
+  if (!endpoint || !apiKey) {
     await readWithBrowserTts(text, isLastSegment);
     return;
   }
 
   setTtsState("loading");
 
-  const response = await fetch(`https://${encodeURIComponent(region)}.tts.speech.microsoft.com/cognitiveservices/v1`, {
+  const response = await fetch(endpoint, {
     method: "POST",
     headers: {
-      "Content-Type": "application/ssml+xml",
-      "Ocp-Apim-Subscription-Key": apiKey,
-      "X-Microsoft-OutputFormat": "audio-24khz-48kbitrate-mono-mp3"
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${apiKey}`
     },
-    body: `<speak version="1.0" xml:lang="ko-KR"><voice xml:lang="ko-KR" name="${azureVoiceName}"><prosody rate="-8%" pitch="-2%">${escapeXml(text)}</prosody></voice></speak>`
+    body: JSON.stringify({
+      text,
+      voice: clovaDubbingVoice,
+      format: "mp3"
+    })
   });
 
   if (!response.ok) {
-    throw new Error("Azure TTS request failed");
+    throw new Error("CLOVA Dubbing request failed");
   }
 
   const audioBlob = await response.blob();
@@ -496,7 +493,7 @@ async function playReadingQueue() {
     const isLastSegment = readingIndex === readingQueue.length - 1;
 
     try {
-      await readWithAzureTts(segment, isLastSegment);
+      await readWithClovaDubbing(segment, isLastSegment);
     } catch {
       await readWithBrowserTts(segment, isLastSegment);
     }
@@ -561,6 +558,74 @@ function pauseReading() {
   }
 }
 
+function stopMeditationMusic() {
+  if (!meditationPlaying) {
+    return;
+  }
+
+  meditationNodes.forEach((node) => {
+    if (node.gain) {
+      node.gain.gain.setTargetAtTime(0, meditationContext.currentTime, 0.4);
+    }
+    if (node.oscillator) {
+      window.setTimeout(() => node.oscillator.stop(), 700);
+    }
+  });
+
+  meditationNodes = [];
+  meditationPlaying = false;
+  playMeditation.classList.remove("is-active");
+  playMeditation.textContent = "명상음악 듣기";
+}
+
+function startMeditationMusic() {
+  const AudioContext = window.AudioContext || window.webkitAudioContext;
+
+  if (!AudioContext) {
+    return;
+  }
+
+  meditationContext = meditationContext || new AudioContext();
+  const frequencies = [196, 246.94, 329.63];
+  const masterGain = meditationContext.createGain();
+  masterGain.gain.setValueAtTime(0.035, meditationContext.currentTime);
+  masterGain.connect(meditationContext.destination);
+
+  meditationNodes = frequencies.map((frequency, index) => {
+    const oscillator = meditationContext.createOscillator();
+    const gain = meditationContext.createGain();
+    const filter = meditationContext.createBiquadFilter();
+
+    oscillator.type = "sine";
+    oscillator.frequency.setValueAtTime(frequency, meditationContext.currentTime);
+    oscillator.detune.setValueAtTime(index * 4, meditationContext.currentTime);
+    filter.type = "lowpass";
+    filter.frequency.setValueAtTime(900, meditationContext.currentTime);
+    gain.gain.setValueAtTime(0, meditationContext.currentTime);
+    gain.gain.linearRampToValueAtTime(0.16 / (index + 1), meditationContext.currentTime + 1.8);
+
+    oscillator.connect(filter);
+    filter.connect(gain);
+    gain.connect(masterGain);
+    oscillator.start();
+
+    return { oscillator, gain };
+  });
+
+  meditationPlaying = true;
+  playMeditation.classList.add("is-active");
+  playMeditation.textContent = "명상음악 끄기";
+}
+
+function toggleMeditationMusic() {
+  if (meditationPlaying) {
+    stopMeditationMusic();
+    return;
+  }
+
+  startMeditationMusic();
+}
+
 function renderHymn(selected) {
   hymnLink.href = selected.hymn.url;
   hymnLink.textContent = "YouTube";
@@ -574,9 +639,13 @@ form.addEventListener("submit", saveNote);
 clearForm.addEventListener("click", resetForm);
 printPage.addEventListener("click", () => window.print());
 playTts.addEventListener("click", readSelectedPassage);
+playMeditation.addEventListener("click", toggleMeditationMusic);
 pauseTts.addEventListener("click", pauseReading);
 stopTts.addEventListener("click", stopReading);
-window.addEventListener("beforeunload", stopReading);
+window.addEventListener("beforeunload", () => {
+  stopReading();
+  stopMeditationMusic();
+});
 savedList.addEventListener("click", (event) => {
   const button = event.target.closest("[data-id]");
   if (button) {
