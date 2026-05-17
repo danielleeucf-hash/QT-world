@@ -24,7 +24,7 @@ Workers static assets는 `public/` 디렉터리만 배포합니다.
    npx wrangler kv namespace create QT_KV
    ```
 
-2. 출력된 KV namespace `id`를 `wrangler.jsonc`의 `REPLACE_WITH_QT_KV_NAMESPACE_ID`에 넣습니다.
+2. 출력된 KV namespace `id`를 `wrangler.jsonc`의 `kv_namespaces[0].id`에 넣습니다.
 
 3. 관리자 수동 생성 API용 secret을 설정합니다.
 
