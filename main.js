@@ -51,6 +51,7 @@ const passageGuide = document.querySelector("#passageGuide");
 const passageExplanation = document.querySelector("#passageExplanation");
 const scriptureText = document.querySelector("#scriptureText");
 const ttsStatus = document.querySelector("#ttsStatus");
+const voiceSelect = document.querySelector("#voiceSelect");
 const playTts = document.querySelector("#playTts");
 const pauseTts = document.querySelector("#pauseTts");
 const stopTts = document.querySelector("#stopTts");
@@ -219,39 +220,74 @@ function setTtsState(state) {
   }[state];
 }
 
-function getKoreanVoice() {
+function scoreVoice(voice) {
+  const name = `${voice.name} ${voice.voiceURI}`.toLowerCase();
+  const naturalVoiceHints = [
+    "natural",
+    "neural",
+    "premium",
+    "enhanced",
+    "wavenet",
+    "google",
+    "microsoft",
+    "apple",
+    "yuna",
+    "sora",
+    "sunhi",
+    "heami",
+    "female",
+    "woman"
+  ];
+
+  return naturalVoiceHints.reduce((total, hint) => (
+    name.includes(hint) ? total + 2 : total
+  ), voice.lang === "ko-KR" ? 4 : 0);
+}
+
+function getAvailableKoreanVoices() {
   const voices = speechSynthesis.getVoices();
-  const koreanVoices = voices.filter((voice) => voice.lang.toLowerCase().startsWith("ko"));
+  return voices
+    .filter((voice) => voice.lang.toLowerCase().startsWith("ko"))
+    .sort((first, second) => scoreVoice(second) - scoreVoice(first));
+}
+
+function populateVoiceSelect() {
+  if (!("speechSynthesis" in window)) {
+    voiceSelect.innerHTML = "<option>TTS 미지원</option>";
+    voiceSelect.disabled = true;
+    return;
+  }
+
+  const koreanVoices = getAvailableKoreanVoices();
+  if (koreanVoices.length === 0) {
+    voiceSelect.innerHTML = "<option>한국어 음성 없음</option>";
+    voiceSelect.disabled = true;
+    return;
+  }
+
+  const currentValue = voiceSelect.value;
+  voiceSelect.disabled = false;
+  voiceSelect.innerHTML = koreanVoices
+    .map((voice, index) => {
+      const label = index === 0 ? `${voice.name} · 추천` : voice.name;
+      return `<option value="${escapeHtml(voice.voiceURI)}">${escapeHtml(label)}</option>`;
+    })
+    .join("");
+
+  if (currentValue && koreanVoices.some((voice) => voice.voiceURI === currentValue)) {
+    voiceSelect.value = currentValue;
+  }
+}
+
+function getKoreanVoice() {
+  const koreanVoices = getAvailableKoreanVoices();
 
   if (koreanVoices.length === 0) {
     return null;
   }
 
-  const softVoiceHints = [
-    "female",
-    "woman",
-    "natural",
-    "neural",
-    "premium",
-    "google",
-    "microsoft",
-    "yuna",
-    "sora",
-    "sunhi",
-    "heami",
-    "kyung"
-  ];
-
-  return koreanVoices
-    .map((voice) => {
-      const name = `${voice.name} ${voice.voiceURI}`.toLowerCase();
-      const score = softVoiceHints.reduce((total, hint) => (
-        name.includes(hint) ? total + 1 : total
-      ), voice.lang === "ko-KR" ? 2 : 0);
-
-      return { voice, score };
-    })
-    .sort((first, second) => second.score - first.score)[0].voice;
+  return koreanVoices.find((voice) => voice.voiceURI === voiceSelect.value)
+    || koreanVoices[0];
 }
 
 function stopReading() {
@@ -281,9 +317,9 @@ function readSelectedPassage() {
   const voice = getKoreanVoice();
 
   utterance.lang = "ko-KR";
-  utterance.rate = 0.82;
-  utterance.pitch = 0.92;
-  utterance.volume = 0.92;
+  utterance.rate = 0.78;
+  utterance.pitch = 0.96;
+  utterance.volume = 0.9;
 
   if (voice) {
     utterance.voice = voice;
@@ -315,11 +351,10 @@ printPage.addEventListener("click", () => window.print());
 playTts.addEventListener("click", readSelectedPassage);
 pauseTts.addEventListener("click", pauseReading);
 stopTts.addEventListener("click", stopReading);
+voiceSelect.addEventListener("change", stopReading);
 window.addEventListener("beforeunload", stopReading);
 if ("speechSynthesis" in window) {
-  speechSynthesis.addEventListener("voiceschanged", () => {
-    getKoreanVoice();
-  });
+  speechSynthesis.addEventListener("voiceschanged", populateVoiceSelect);
 }
 savedList.addEventListener("click", (event) => {
   const button = event.target.closest("[data-id]");
@@ -329,5 +364,6 @@ savedList.addEventListener("click", (event) => {
 });
 
 initDate();
+populateVoiceSelect();
 updatePassage();
 renderNotes();
