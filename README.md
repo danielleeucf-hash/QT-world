@@ -14,6 +14,7 @@
 ## Cloudflare Workers
 
 이 프로젝트는 `qtworld.posmactw.workers.dev` 같은 Workers 도메인에서 정적 파일과 API를 함께 제공합니다.
+Workers static assets는 `public/` 디렉터리만 배포합니다.
 
 ### 설정
 

@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="QT World는 매일 바뀌는 말씀 본문, Google Cloud TTS, 찬송가, 한 줄 묵상을 돕는 큐티 웹사이트입니다." />
+  <title>QT World | 매일 말씀 묵상</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <link href="style.css" rel="stylesheet">
+</head>
+<body>
+  <header class="site-header" aria-label="주요 메뉴">
+    <a class="brand" href="#top" aria-label="QT World 홈">
+      <span class="brand-mark">QT</span>
+      <span>QT World</span>
+    </a>
+    <nav class="nav-links" aria-label="페이지 이동">
+      <a href="#today">오늘 묵상</a>
+      <a href="#journal">묵상 노트</a>
+    </nav>
+  </header>
+
+  <main id="top">
+    <section class="hero" aria-labelledby="hero-title">
+      <img src="assets/devotional-desk.png" alt="성경과 노트가 놓인 아침 묵상 책상" class="hero-image">
+      <div class="hero-overlay"></div>
+      <div class="hero-content">
+        <p class="eyebrow">Daily Quiet Time Platform</p>
+        <h1 id="hero-title">말씀을 읽고, 삶으로 기록하는 매일 묵상</h1>
+        <p class="hero-copy">매일 바뀌는 긴 본문을 듣고, 찬송과 함께 한 줄 묵상으로 삶의 방향을 정리하도록 설계했습니다.</p>
+        <div class="hero-actions">
+          <a class="button primary" href="#today">오늘 묵상 시작</a>
+          <button class="button secondary" type="button" id="printPage">인쇄</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="section intro" aria-label="묵상 흐름">
+      <div class="section-heading">
+        <p class="eyebrow">Meditation Flow</p>
+        <h2>전문 큐티 사이트의 핵심 흐름</h2>
+      </div>
+      <div class="flow-grid">
+        <article class="flow-item">
+          <span class="step">01</span>
+          <h3>본문</h3>
+          <p>오늘 읽을 말씀과 핵심 구절을 먼저 확인합니다.</p>
+        </article>
+        <article class="flow-item">
+          <span class="step">02</span>
+          <h3>듣기</h3>
+          <p>Google Cloud TTS 음성으로 본문을 차분히 듣습니다.</p>
+        </article>
+        <article class="flow-item">
+          <span class="step">03</span>
+          <h3>찬송</h3>
+          <p>오늘 본문과 어울리는 찬송을 함께 연결합니다.</p>
+        </article>
+        <article class="flow-item">
+          <span class="step">04</span>
+          <h3>한 줄 묵상</h3>
+          <p>오늘 마음에 남은 말씀을 짧게 남깁니다.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="section today" id="today" aria-labelledby="today-title">
+      <div class="section-heading">
+        <p class="eyebrow">Today</p>
+        <h2 id="today-title">오늘 묵상</h2>
+      </div>
+
+      <div class="workspace">
+        <aside class="passage-panel" aria-label="오늘 본문 설정">
+          <div class="date-card">
+            <span id="dayName">오늘</span>
+            <strong id="todayDate"></strong>
+          </div>
+
+          <label for="passageSelect">본문 선택</label>
+          <select id="passageSelect">
+            <option value="john">요한복음 10:1-18</option>
+            <option value="matthew">마태복음 6:19-34</option>
+            <option value="romans">로마서 12:1-21</option>
+          </select>
+          <p class="daily-note" id="dailyPassageNote"></p>
+          <p class="api-message" id="todayApiMessage" role="status"></p>
+
+          <div class="passage-summary">
+            <p class="label">핵심 구절</p>
+            <blockquote id="keyVerse"></blockquote>
+            <p id="passageGuide"></p>
+          </div>
+
+          <div class="checklist" aria-label="묵상 체크리스트">
+            <label><input type="checkbox" data-check="read"> 본문을 천천히 읽기</label>
+            <label><input type="checkbox" data-check="listen"> 음성으로 다시 듣기</label>
+            <label><input type="checkbox" data-check="hymn"> 오늘의 찬송 듣기</label>
+            <label><input type="checkbox" data-check="note"> 한 줄 묵상 남기기</label>
+          </div>
+        </aside>
+
+        <div class="study-stack">
+          <article class="scripture-reader" aria-labelledby="scriptureTitle">
+            <div class="reader-heading">
+              <div>
+                <p class="eyebrow">Scripture Reader</p>
+                <h3 id="scriptureTitle">본문 전체</h3>
+              </div>
+              <span id="ttsStatus">읽기 대기</span>
+            </div>
+            <div class="passage-explanation">
+              <p class="label">묵상</p>
+              <p id="passageExplanation"></p>
+            </div>
+            <div class="daily-devotion-grid">
+              <section>
+                <p class="label">적용</p>
+                <p id="todayApplication"></p>
+              </section>
+              <section>
+                <p class="label">기도</p>
+                <p id="todayPrayer"></p>
+              </section>
+            </div>
+            <div class="reader-tools" aria-label="본문 음성 읽기">
+              <p class="tts-note">Google Natural 기본 음성으로 읽습니다.</p>
+              <div class="tts-controls">
+                <button class="mini-button" type="button" id="playTts">읽기</button>
+                <button class="mini-button" type="button" id="pauseTts">일시정지</button>
+                <button class="mini-button" type="button" id="stopTts">정지</button>
+              </div>
+            </div>
+            <div class="scripture-text" id="scriptureText" tabindex="0"></div>
+          </article>
+
+          <article class="hymn-card" aria-labelledby="hymnTitle">
+            <div class="reader-heading">
+              <div>
+                <p class="eyebrow">Today's Hymn</p>
+                <h3 id="hymnTitle">오늘의 찬송가</h3>
+              </div>
+              <a class="mini-button hymn-link" id="hymnLink" href="#" target="_blank" rel="noreferrer">YouTube</a>
+            </div>
+            <p id="hymnDescription"></p>
+            <p class="hymn-meta" id="hymnMeta"></p>
+            <iframe id="hymnPreview" title="오늘의 찬송가 YouTube 미리보기" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+          </article>
+
+          <form class="journal-form" id="journalForm">
+            <div class="field-row">
+              <label for="title">묵상 제목</label>
+              <input id="title" name="title" type="text" placeholder="오늘 말씀의 제목을 적어보세요">
+            </div>
+
+            <label class="note-field" for="meditation">
+              <span>한 줄 묵상</span>
+              <textarea id="meditation" name="meditation" rows="5" placeholder="오늘 본문을 듣고 마음에 남은 말씀을 한두 문장으로 적어보세요"></textarea>
+            </label>
+
+            <div class="form-actions">
+              <button class="button primary" type="submit">묵상 저장</button>
+              <button class="button ghost" type="button" id="clearForm">새로 작성</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <section class="section journal" id="journal" aria-labelledby="journal-title">
+      <div class="section-heading">
+        <p class="eyebrow">Journal</p>
+        <h2 id="journal-title">저장된 묵상 노트</h2>
+      </div>
+      <div class="saved-list" id="savedList" aria-live="polite"></div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p>QT World는 개인 묵상과 공동체 나눔을 위한 정적 웹사이트입니다.</p>
+  </footer>
+
+  <script defer type="text/javascript" src="main.js"></script>
+</body>
+</html>
