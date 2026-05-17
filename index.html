@@ -92,6 +92,19 @@
             <p id="passageGuide"></p>
           </div>
 
+          <article class="scripture-reader" aria-labelledby="scriptureTitle">
+            <div class="reader-heading">
+              <h3 id="scriptureTitle">본문 전체</h3>
+              <span id="ttsStatus">읽기 대기</span>
+            </div>
+            <div class="tts-controls" aria-label="본문 음성 읽기">
+              <button class="mini-button" type="button" id="playTts">읽기</button>
+              <button class="mini-button" type="button" id="pauseTts">일시정지</button>
+              <button class="mini-button" type="button" id="stopTts">정지</button>
+            </div>
+            <div class="scripture-text" id="scriptureText" tabindex="0"></div>
+          </article>
+
           <div class="checklist" aria-label="묵상 체크리스트">
             <label><input type="checkbox" data-check="read"> 본문을 천천히 읽기</label>
             <label><input type="checkbox" data-check="observe"> 반복 단어 표시하기</label>

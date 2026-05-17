@@ -2,17 +2,41 @@ const passages = {
   psalm: {
     label: "시편 23:1-6",
     keyVerse: "여호와는 나의 목자시니 내게 부족함이 없으리로다.",
-    guide: "하나님의 인도와 보호를 신뢰하는 고백을 따라 오늘의 두려움과 필요를 기도로 올려드립니다."
+    guide: "하나님의 인도와 보호를 신뢰하는 고백을 따라 오늘의 두려움과 필요를 기도로 올려드립니다.",
+    verses: [
+      "여호와는 나의 목자시니 내게 부족함이 없으리로다",
+      "그가 나를 푸른 초장에 누이시며 쉴만한 물가으로 인도하시는도다",
+      "내 영혼을 소생시키시고 자기 이름을 위하여 의의 길로 인도하시는도다",
+      "내가 사망의 음침한 골짜기로 다닐찌라도 해를 두려워하지 않을 것은 주께서 나와 함께 하심이라 주의 지팡이와 막대기가 나를 안위하시나이다",
+      "주께서 내 원수의 목전에서 내게 상을 베푸시고 기름으로 내 머리에 바르셨으니 내 잔이 넘치나이다",
+      "나의 평생에 선하심과 인자하심이 정녕 나를 따르리니 내가 여호와의 집에 영원히 거하리로다"
+    ]
   },
   matthew: {
     label: "마태복음 6:25-34",
     keyVerse: "너희는 먼저 그의 나라와 그의 의를 구하라.",
-    guide: "염려를 내려놓고 하나님 나라의 우선순위로 하루를 재정렬합니다."
+    guide: "염려를 내려놓고 하나님 나라의 우선순위로 하루를 재정렬합니다.",
+    verses: [
+      "그러므로 내가 너희에게 이르노니 목숨을 위하여 무엇을 먹을까 무엇을 마실까 몸을 위하여 무엇을 입을까 염려하지 말라 목숨이 음식보다 중하지 아니하며 몸이 의복보다 중하지 아니하냐",
+      "공중의 새를 보라 심지도 않고 거두지도 않고 창고에 모아 들이지도 아니하되 너희 천부께서 기르시나니 너희는 이것들보다 귀하지 아니하냐",
+      "너희 중에 누가 염려함으로 그 키를 한 자나 더할 수 있느냐",
+      "또 너희가 어찌 의복을 위하여 염려하느냐 들의 백합화가 어떻게 자라는가 생각하여 보라 수고도 아니하고 길쌈도 아니하느니라",
+      "그러나 내가 너희에게 말하노니 솔로몬의 모든 영광으로도 입은 것이 이 꽃 하나만 같지 못하였느니라",
+      "오늘 있다가 내일 아궁이에 던지우는 들풀도 하나님이 이렇게 입히시거든 하물며 너희일까보냐 믿음이 적은 자들아",
+      "그러므로 염려하여 이르기를 무엇을 먹을까 무엇을 마실까 무엇을 입을까 하지 말라",
+      "이는 다 이방인들이 구하는 것이라 너희 천부께서 이 모든 것이 너희에게 있어야 할 줄을 아시느니라",
+      "너희는 먼저 그의 나라와 그의 의를 구하라 그리하면 이 모든 것을 너희에게 더하시리라",
+      "그러므로 내일 일을 위하여 염려하지 말라 내일 일은 내일 염려할 것이요 한 날 괴로움은 그 날에 족하니라"
+    ]
   },
   romans: {
     label: "로마서 12:1-2",
     keyVerse: "너희 몸을 하나님이 기뻐하시는 거룩한 산 제물로 드리라.",
-    guide: "예배가 일상의 생각과 선택을 새롭게 하는 방식으로 이어지도록 묵상합니다."
+    guide: "예배가 일상의 생각과 선택을 새롭게 하는 방식으로 이어지도록 묵상합니다.",
+    verses: [
+      "그러므로 형제들아 내가 하나님의 모든 자비하심으로 너희를 권하노니 너희 몸을 하나님이 기뻐하시는 거룩한 산 제사로 드리라 이는 너희의 드릴 영적 예배니라",
+      "너희는 이 세대를 본받지 말고 오직 마음을 새롭게 함으로 변화를 받아 하나님의 선하시고 기뻐하시고 온전하신 뜻이 무엇인지 분별하도록 하라"
+    ]
   }
 };
 
@@ -21,6 +45,11 @@ const form = document.querySelector("#journalForm");
 const passageSelect = document.querySelector("#passageSelect");
 const keyVerse = document.querySelector("#keyVerse");
 const passageGuide = document.querySelector("#passageGuide");
+const scriptureText = document.querySelector("#scriptureText");
+const ttsStatus = document.querySelector("#ttsStatus");
+const playTts = document.querySelector("#playTts");
+const pauseTts = document.querySelector("#pauseTts");
+const stopTts = document.querySelector("#stopTts");
 const savedList = document.querySelector("#savedList");
 const todayDate = document.querySelector("#todayDate");
 const dayName = document.querySelector("#dayName");
@@ -59,10 +88,30 @@ function setNotes(notes) {
   localStorage.setItem(storageKey, JSON.stringify(notes));
 }
 
+function getSelectedPassage() {
+  return passages[passageSelect.value];
+}
+
+function renderScripture(selected) {
+  scriptureText.innerHTML = selected.verses
+    .map((verse, index) => `
+      <p><span class="verse-number">${index + 1}</span>${escapeHtml(verse)}</p>
+    `)
+    .join("");
+}
+
+function getReadableScripture(selected) {
+  return `${selected.label}. ${selected.verses
+    .map((verse, index) => `${index + 1}절. ${verse}`)
+    .join(" ")}`;
+}
+
 function updatePassage() {
-  const selected = passages[passageSelect.value];
+  const selected = getSelectedPassage();
+  stopReading();
   keyVerse.textContent = selected.keyVerse;
   passageGuide.textContent = selected.guide;
+  renderScripture(selected);
 }
 
 function resetForm() {
@@ -154,10 +203,85 @@ function initDate() {
   dayName.textContent = dayFormatter.format(now);
 }
 
+function setTtsState(state) {
+  playTts.classList.toggle("is-active", state === "playing");
+  pauseTts.classList.toggle("is-active", state === "paused");
+  ttsStatus.textContent = {
+    idle: "읽기 대기",
+    playing: "읽는 중",
+    paused: "일시정지",
+    unsupported: "TTS 미지원"
+  }[state];
+}
+
+function getKoreanVoice() {
+  const voices = speechSynthesis.getVoices();
+  return voices.find((voice) => voice.lang === "ko-KR")
+    || voices.find((voice) => voice.lang.startsWith("ko"))
+    || null;
+}
+
+function stopReading() {
+  if (!("speechSynthesis" in window)) {
+    return;
+  }
+
+  speechSynthesis.cancel();
+  setTtsState("idle");
+}
+
+function readSelectedPassage() {
+  if (!("speechSynthesis" in window)) {
+    setTtsState("unsupported");
+    return;
+  }
+
+  if (speechSynthesis.paused) {
+    speechSynthesis.resume();
+    setTtsState("playing");
+    return;
+  }
+
+  speechSynthesis.cancel();
+  const selected = getSelectedPassage();
+  const utterance = new SpeechSynthesisUtterance(getReadableScripture(selected));
+  const voice = getKoreanVoice();
+
+  utterance.lang = "ko-KR";
+  utterance.rate = 0.88;
+  utterance.pitch = 1;
+
+  if (voice) {
+    utterance.voice = voice;
+  }
+
+  utterance.onstart = () => setTtsState("playing");
+  utterance.onend = () => setTtsState("idle");
+  utterance.onerror = () => setTtsState("idle");
+
+  speechSynthesis.speak(utterance);
+}
+
+function pauseReading() {
+  if (!("speechSynthesis" in window)) {
+    setTtsState("unsupported");
+    return;
+  }
+
+  if (speechSynthesis.speaking && !speechSynthesis.paused) {
+    speechSynthesis.pause();
+    setTtsState("paused");
+  }
+}
+
 passageSelect.addEventListener("change", updatePassage);
 form.addEventListener("submit", saveNote);
 clearForm.addEventListener("click", resetForm);
 printPage.addEventListener("click", () => window.print());
+playTts.addEventListener("click", readSelectedPassage);
+pauseTts.addEventListener("click", pauseReading);
+stopTts.addEventListener("click", stopReading);
+window.addEventListener("beforeunload", stopReading);
 savedList.addEventListener("click", (event) => {
   const button = event.target.closest("[data-id]");
   if (button) {

@@ -341,6 +341,79 @@ blockquote {
   padding-left: 14px;
 }
 
+.scripture-reader {
+  background: #f8faf8;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  margin-bottom: 22px;
+  padding: 18px;
+}
+
+.reader-heading {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.reader-heading h3 {
+  font-size: 1.04rem;
+  margin: 0;
+}
+
+.reader-heading span {
+  color: var(--clay);
+  font-size: 0.86rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.tts-controls {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-bottom: 14px;
+}
+
+.mini-button {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--sage-dark);
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 800;
+  min-height: 40px;
+  padding: 0 10px;
+}
+
+.mini-button:hover,
+.mini-button.is-active {
+  background: var(--sage);
+  border-color: var(--sage);
+  color: #fff;
+}
+
+.scripture-text {
+  color: var(--ink);
+  display: grid;
+  gap: 10px;
+  max-height: 360px;
+  overflow: auto;
+  padding-right: 6px;
+}
+
+.scripture-text p {
+  margin: 0;
+}
+
+.verse-number {
+  color: var(--clay);
+  font-weight: 800;
+  margin-right: 6px;
+}
+
 .checklist {
   display: grid;
   gap: 12px;
@@ -496,6 +569,11 @@ blockquote {
   .workspace,
   .note-grid {
     display: block;
+  }
+
+  .scripture-text {
+    max-height: none;
+    overflow: visible;
   }
 
   .passage-panel,
